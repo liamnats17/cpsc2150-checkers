@@ -5,12 +5,17 @@ import cpsc2150.extendedCheckers.models.CheckerBoard;
 
 import static org.junit.Assert.*;
 
+import cpsc2150.extendedCheckers.models.ICheckerBoard;
 import cpsc2150.extendedCheckers.util.DirectionEnum;
 import org.junit.Test;
 
 import java.util.Map;
 
 public class TestCheckerBoard {
+
+    private ICheckerBoard makeBoard() {
+        return new CheckerBoard();
+    }
     
     // Helper to build expected board string
     private String arrayToString(char[][] board) {
@@ -52,17 +57,17 @@ public class TestCheckerBoard {
     private void initializeDefaultBoard(char[][] board) {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 8; col++) {
-                board[row][col] = (row + col) % 2 == 1 ? '*' : 'x';
+                board[row][col] = (row + col) % 2 == 1 ? 'x' : '*';
             }
         }
         for (int row = 3; row < 5; row++) {
             for (int col = 0; col < 8; col++) {
-                board[row][col] = (row + col) % 2 == 1 ? '*' : ' ';
+                board[row][col] = (row + col) % 2 == 1 ? ' ' : '*';
             }
       }
         for (int row = 5; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                board[row][col] = (row + col) % 2 == 1 ? '*' : 'o';
+                board[row][col] = (row + col) % 2 == 1 ? 'o' : '*';
             }
         }
     }
@@ -70,7 +75,7 @@ public class TestCheckerBoard {
     // ------------------ Constructor Test ------------------
     @Test
     public void testCheckerBoard_Initialize() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         char[][] expected = new char[8][8];
         initializeDefaultBoard(expected);
         assertEquals(arrayToString(expected), cb.toString());
@@ -79,31 +84,31 @@ public class TestCheckerBoard {
     // ------------------ whatsAtPos Tests ------------------
     @Test
     public void testWhatsAtPos_MinRow_MinCol_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         assertEquals('x', cb.whatsAtPos(new BoardPosition(0, 0)));
     }
 
     @Test
     public void testWhatsAtPos_MaxRow_MaxCol() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         assertEquals('o', cb.whatsAtPos(new BoardPosition(7, 7)));
     }
 
     @Test
     public void testWhatsAtPos_Empty_Space() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         assertEquals(' ', cb.whatsAtPos(new BoardPosition(3, 1)));
     }
 
     @Test
     public void testWhatsAtPos_Black_Tile() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         assertEquals('*', cb.whatsAtPos(new BoardPosition(0, 1)));
     }
 
     @Test
     public void testWhatsAtPos_After_Turn_1_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.movePiece(new BoardPosition(2, 2), DirectionEnum.SE);
         assertEquals('x', cb.whatsAtPos(new BoardPosition(3, 3)));
     }
@@ -111,7 +116,7 @@ public class TestCheckerBoard {
     // ------------------ placePiece Tests ------------------
     @Test
     public void testPlacePiece_Empty_Tile_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         char[][] expected = new char[8][8];
         initializeDefaultBoard(expected);
         cb.placePiece(new BoardPosition(3, 1), 'x');
@@ -121,7 +126,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testPlacePiece_Occupied_Tile_Empty() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         char[][] expected = new char[8][8];
         initializeDefaultBoard(expected);
         cb.placePiece(new BoardPosition(5, 1), ' ');
@@ -131,7 +136,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testPlacePiece_Empty_Tile_Player_2() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         char[][] expected = new char[8][8];
         initializeDefaultBoard(expected);
         cb.placePiece(new BoardPosition(4, 6), 'o');
@@ -141,7 +146,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testPlacePiece_After_Turn_1_Player_2() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         char[][] expected = new char[8][8];
         initializeDefaultBoard(expected);
         cb.movePiece(new BoardPosition(2, 4), DirectionEnum.SE);
@@ -154,7 +159,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testPlacePiece_After_Turn_2_Player_1() {
-        /*CheckerBoard cb = new CheckerBoard();
+        /*ICheckerBoard cb = makeBoard();
         cb.movePiece(new BoardPosition(2, 4), DirectionEnum.SE);
         expected[2][4] = ' ';
         expected[3][5] = 'x';
@@ -169,7 +174,7 @@ public class TestCheckerBoard {
     // ------------------ getPieceCounts Test ------------------
     @Test
     public void testGetPieceCounts_InitialBoard() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         Map<Character, Integer> counts = cb.getPieceCounts();
         assertEquals((Integer) 12, counts.get('x'));
         assertEquals((Integer) 12, counts.get('o'));
@@ -178,7 +183,7 @@ public class TestCheckerBoard {
     // ------------------ getViableDirections Test ------------------
     @Test
     public void testGetViableDirections() {
-        /*CheckerBoard cb = new CheckerBoard();
+        /*ICheckerBoard cb = makeBoard();
         Map<Character, List<DirectionEnum>> dirs = cb.getViableDirections();
         assertEquals(Arrays.asList(DirectionEnum.SE, DirectionEnum.SW), dirs.get('x'));
         assertEquals(Arrays.asList(DirectionEnum.NE, DirectionEnum.NW), dirs.get('o'));
@@ -189,13 +194,13 @@ public class TestCheckerBoard {
     // ------------------ checkPlayerWin Tests ------------------
     @Test
     public void testCheckPlayerWin_False_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         assertFalse(cb.checkPlayerWin('x'));
     }
 
     @Test
     public void testCheckPlayerWin_True_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         for (int row = 5; row < 8; row++) {
             for (int col = 0; col < 8; col += 2) {
                 cb.placePiece(new BoardPosition(row, col), ' ');
@@ -207,7 +212,7 @@ public class TestCheckerBoard {
     // ------------------ crownPiece Tests ------------------
     @Test
     public void testCrownPiece_Back_Row_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.placePiece(new BoardPosition(7, 1), 'x');
         cb.crownPiece(new BoardPosition(7, 1));
         assertEquals('X', cb.whatsAtPos(new BoardPosition(7, 1)));
@@ -215,14 +220,14 @@ public class TestCheckerBoard {
 
     @Test
     public void testCrownPiece_Middle_Board_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.crownPiece(new BoardPosition(2, 6));
         assertEquals('X', cb.whatsAtPos(new BoardPosition(2, 6)));
     }
 
     @Test
     public void testCrownPiece_Back_Row_Player_2() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.placePiece(new BoardPosition(0, 2), 'o');
         cb.crownPiece(new BoardPosition(0, 2));
         assertEquals('O', cb.whatsAtPos(new BoardPosition(0, 2)));
@@ -231,7 +236,7 @@ public class TestCheckerBoard {
     // ------------------ movePiece Tests ------------------
     @Test
     public void testMovePiece_Player_1_SE() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.movePiece(new BoardPosition(2, 0), DirectionEnum.SE);
         assertEquals('x', cb.whatsAtPos(new BoardPosition(3, 1)));
         assertEquals(' ', cb.whatsAtPos(new BoardPosition(2, 0))); // Tests if starting position is now blank
@@ -239,7 +244,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testMovePiece_Player_2_NE() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.movePiece(new BoardPosition(5, 5), DirectionEnum.NE);
         assertEquals('o', cb.whatsAtPos(new BoardPosition(4, 6)));
         assertEquals(' ', cb.whatsAtPos(new BoardPosition(5, 5)));
@@ -247,7 +252,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testMovePiece_Crowned_SW() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.placePiece(new BoardPosition(4, 4), 'X');
         cb.placePiece(new BoardPosition(5, 3), ' ');
         cb.movePiece(new BoardPosition(4, 4), DirectionEnum.SW);
@@ -258,7 +263,7 @@ public class TestCheckerBoard {
     // ------------------ jumpPiece Tests ------------------
     @Test
     public void testJumpPiece_Player_1_Jump_Player_2() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.movePiece(new BoardPosition(2, 2), DirectionEnum.SE);
         cb.movePiece(new BoardPosition(5, 1), DirectionEnum.NE);
         cb.jumpPiece(new BoardPosition(3, 3), DirectionEnum.SW);
@@ -269,7 +274,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testJumpPiece_Player_2_Jump_Player_1() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.movePiece(new BoardPosition(2, 2), DirectionEnum.SE);
         cb.movePiece(new BoardPosition(3, 3), DirectionEnum.SW);
         cb.jumpPiece(new BoardPosition(5, 3), DirectionEnum.NW);
@@ -280,7 +285,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testJumpPiece_Crowned_Backward() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.placePiece(new BoardPosition(5, 5), 'X');
         cb.placePiece(new BoardPosition(2, 6), ' ');
         cb.movePiece(new BoardPosition(5, 7), DirectionEnum.NW);
@@ -293,7 +298,7 @@ public class TestCheckerBoard {
     // ------------------ scanSurroundingPositions Tests ------------------
     @Test
     public void testScanSurroundingPositions_AllEmpty() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         cb.placePiece(new BoardPosition(4, 2), ' ');
         Map<DirectionEnum, Character> result = cb.scanSurroundingPositions(new BoardPosition(4, 2));
         assertEquals(' ', (char) result.get(DirectionEnum.SE));
@@ -304,7 +309,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testScanSurroundingPositions_AllOccupied() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         Map<DirectionEnum, Character> result = cb.scanSurroundingPositions(new BoardPosition(6, 2));
         assertEquals('o', (char) result.get(DirectionEnum.SE));
         assertEquals('o', (char) result.get(DirectionEnum.SW));
@@ -314,7 +319,7 @@ public class TestCheckerBoard {
 
     @Test
     public void testScanSurroundingPositions_BoardEdge() {
-        CheckerBoard cb = new CheckerBoard();
+        ICheckerBoard cb = makeBoard();
         Map<DirectionEnum, Character> result = cb.scanSurroundingPositions(new BoardPosition(2, 0));
         assertEquals(' ', (char) result.get(DirectionEnum.SE));
         assertNull(result.get(DirectionEnum.SW));

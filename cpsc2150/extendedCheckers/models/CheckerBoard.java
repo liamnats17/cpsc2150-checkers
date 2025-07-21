@@ -4,8 +4,9 @@ import cpsc2150.extendedCheckers.util.DirectionEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-public class CheckerBoard
+public class CheckerBoard extends AbsCheckerBoard
 {
     /**
      * A 2D array of characters used to represent our checkerboard.
@@ -41,19 +42,43 @@ public class CheckerBoard
      * Constructor for the CheckerBoard object.
      *
      * @pre none
-     * @post board is an 8x8 grid initialized with correct starting pieces;
+     * @post board is a 8x8 grid initialized with correct starting pieces;
      *       pieceCount maps each player to STARTING_COUNT;
      *       viableDirections maps each player to correct directions (standard or king)
      */
     public CheckerBoard() {
-        /*
-        Constructor for the CheckerBoard object. The constructor should initialize the three instance variables to
-        a new data structure of their respective type. Furthermore, the constructor should use the pieceCount HashMap
-        to map the starting count of tokens to each player, and use the viableDirections HashMap to map the players to
-        their respective starting directions (SE and SW for player one, NE and NW for player two). Finally, the
-        constructor should also initialize all the indices within the checkerboard to either a player char, an asterisk
-        (a 'black, non-playable' position), or a space (the 'empty' position)
-         */
+            board = new char[ROW_NUM][COL_NUM];
+            pieceCount = new HashMap<>();
+            viableDirections = new HashMap<>();
+
+            pieceCount.put(PLAYER_ONE, STARTING_COUNT);
+            pieceCount.put(PLAYER_TWO, STARTING_COUNT);
+
+            ArrayList<DirectionEnum> p1Dirs = new ArrayList<>();
+            p1Dirs.add(DirectionEnum.SE);
+            p1Dirs.add(DirectionEnum.SW);
+            ArrayList<DirectionEnum> p2Dirs = new ArrayList<>();
+            p2Dirs.add(DirectionEnum.NE);
+            p2Dirs.add(DirectionEnum.NW);
+
+            viableDirections.put(PLAYER_ONE, p1Dirs);
+            viableDirections.put(PLAYER_TWO, p2Dirs);
+
+            for (int r = 0; r < ROW_NUM; r++) {
+                for (int c = 0; c < COL_NUM; c++) {
+                    if ((r + c) % 2 == 1) {
+                        if (r < 3) {
+                            board[r][c] = PLAYER_ONE;
+                        } else if (r > 4) {
+                            board[r][c] = PLAYER_TWO;
+                        } else {
+                            board[r][c] = EMPTY_POS;
+                        }
+                    } else {
+                        board[r][c] = BLACK_TILE;
+                    }
+                }
+            }
     }
 
     /**
@@ -63,10 +88,9 @@ public class CheckerBoard
      * @pre none
      * @post returns reference to viableDirections
      */
+    @Override
     public HashMap<Character, ArrayList<DirectionEnum>> getViableDirections() {
-        /*
-        Simple accessor for the viableDirections HashMap.
-         */
+        return viableDirections;
     }
 
     /**
@@ -76,10 +100,9 @@ public class CheckerBoard
      * @pre none
      * @post returns reference to pieceCount
      */
+    @Override
     public HashMap<Character, Integer> getPieceCounts() {
-        /*
-        Simple accessor for the getPieceCounts HashMap
-         */
+        return pieceCount;
     }
 
     /**
@@ -90,11 +113,9 @@ public class CheckerBoard
      * @pre pos != null AND 0 <= pos.row < 8 AND 0 <= pos.col < 8 AND pos != Non_Playable_Tile
      * @post board[pos.row][pos.col] == player
      */
+    @Override
     public void placePiece(BoardPosition pos, char player) {
-        /*
-        A "mutator" for the board 2D array. This should be used for setting a given 2D index within the board 2D array,
-         given by the row and col of the parameter BoardPosition, equal to the char given by player.
-         */
+        board[pos.getRow()][pos.getColumn()] = player;
     }
 
     /**
@@ -105,40 +126,9 @@ public class CheckerBoard
      * @pre pos != null AND 0 <= pos.row < 8 AND 0 <= pos.col < 8
      * @post returns the value of board[pos.row][pos.col]
      */
+    @Override
     public char whatsAtPos(BoardPosition pos) {
-        /*
-        an "accessor" for the board 2D array. Returns what is at the position given by the row and col of the BoardPosition
-        parameter.
-         */
-    }
-
-    /**
-     * Determines if the specified player has won the game.
-     *
-     * @param player character representing the player
-     * @return true if only that player has pieces remaining
-     * @pre player in pieceCount
-     * @post returns true iff all remaining pieces belong to player
-     */
-    public boolean checkPlayerWin(Character player) {
-        /*
-        returns true or false if a player, designated by the player parameter, has won the game of checkers. A player
-        has won if all remaining pieces on the board belong to the player.
-         */
-    }
-
-    /**
-     * Crowns a piece by converting it to uppercase at the specified position.
-     *
-     * @param posOfPlayer position of the piece to crown
-     * @pre posOfPlayer != null AND board[pos.row][pos.col] is a player's standard piece
-     * @post board[pos.row][pos.col] == Character.toUpperCase(originalChar)
-     */
-    public void crownPiece(BoardPosition posOfPlayer) {
-        /*
-        "crowns" a piece by converting the char at the position on the board, given by the posOfPlayer parameter, to an
-        uppercase equivalent of the char.
-         */
+        return board[pos.getRow()][pos.getColumn()];
     }
 
     /**
@@ -150,12 +140,17 @@ public class CheckerBoard
      * @pre startingPos != null AND dir != null AND destination is valid and empty
      * @post board[startingPos] == EMPTY_POS, board[newPos] == piece; returns newPos
      */
+    @Override
     public BoardPosition movePiece(BoardPosition startingPos, DirectionEnum dir) {
-        /*
-        A modified version of placePiece moves a piece on the board, located at the startingPos index, in the direction
-        designated by the DirectionEnum dir. Remember, not only should a piece now appear at the moved location, but the
-        position the piece moved from should now be empty.
-         */
+        char piece = whatsAtPos(startingPos);
+        int newRow = startingPos.getRow() + rowChange(dir);
+        int newCol = startingPos.getColumn() + colChange(dir);
+
+        BoardPosition dest = new BoardPosition(newRow, newCol);
+        placePiece(dest, piece);
+        placePiece(startingPos, EMPTY_POS);
+
+        return dest;
     }
 
     /**
@@ -167,15 +162,25 @@ public class CheckerBoard
      * @pre startingPos != null AND dir != null AND intermediate square has opponent AND landing square is empty
      * @post jumped piece is removed, count decremented; board[startingPos] == EMPTY_POS, board[newPos] == piece
      */
+    @Override
     public BoardPosition jumpPiece(BoardPosition startingPos, DirectionEnum dir) {
-        /*
-        A modified version of movePiece that moves a piece by "jumping" an opponent player piece. When a player "jumps"
-        an opponent, that player should move two positions in the direction passed in by dir parameter. Remember, not
-        only should the piece now appear at the moved location, and the starting position should not be empty, but the
-        position that was "jumped" should now also be empty.
+        char piece = whatsAtPos(startingPos);
+        int rowMid = startingPos.getRow() + rowChange(dir);
+        int colMid = startingPos.getColumn() + colChange(dir);
+        int rowEnd = startingPos.getRow() + 2 * rowChange(dir);
+        int colEnd = startingPos.getColumn() + 2 * colChange(dir);
 
-        Furthermore, this method should remove 1 from the opponent's pieceCount.
-         */
+        BoardPosition mid = new BoardPosition(rowMid, colMid);
+        BoardPosition end = new BoardPosition(rowEnd, colEnd);
+
+        char opponent = whatsAtPos(mid);
+        placePiece(mid, EMPTY_POS);
+        pieceCount.put(Character.toLowerCase(opponent), pieceCount.get(Character.toLowerCase(opponent)) - 1);
+
+        placePiece(end, piece);
+        placePiece(startingPos, EMPTY_POS);
+
+        return end;
     }
 
     /**
@@ -187,43 +192,55 @@ public class CheckerBoard
      * @post returns map of up to 4 direction-to-char entries representing valid diagonal neighbors
      */
     public HashMap<DirectionEnum, Character> scanSurroundingPositions(BoardPosition startingPos) {
-        /*
-        "Scans" the indices surrounding the index given by the startingPos parameter. There are a few different ways
-        we can use this method, so I won't specify any given one in this description. Still, know that this function
-        should return a HashMap mapping the four DirectionEnums to the char located at that position in the respective
-        direction.
+        HashMap<DirectionEnum, Character> surroundings = new HashMap<>();
 
-        For example, the position DirectionEnum.SE of startingPos (2,2) is position (3,3). If position (3,3) is empty,
-        this function would return a HashMap where DirectionEnum.SE is mapped to ' '. If position (3,3) contained a
-        player, it would map DirectionEnum.SE to the char that represents that player.
-         */
+        for (DirectionEnum dir : DirectionEnum.values()) {
+            int r = startingPos.getRow() + rowChange(dir);
+            int c = startingPos.getColumn() + colChange(dir);
+            if (r >= 0 && r < ROW_NUM && c >= 0 && c < COL_NUM) {
+                surroundings.put(dir, board[r][c]);
+            }
+        }
+        return surroundings;
     }
 
     /**
-     * Returns a formatted string representing the board layout.
+     * Helper method for when a piece is moving to determine the row position change
      *
-     * @return the 8x8 board in string format with headers for rows and columns
-     * @pre none
-     * @post string output accurately reflects current board state; no print calls are made
+     * @param dir direction a piece is moving
+     * @pre dir is one of NE, NW, SW, SE
+     * @return int (-1, 1, or 0) representing the row position change
      */
-    public String toString()
-    {
-        /*
-        returns a String representation of the checkerboard with all the pieces on it and their current positions. there
-        should be a "header" line to display all the column numbers and a "header column" that displays all the row
-        numbers. In essence, it should look like this:
+    private int rowChange(DirectionEnum dir) {
+        switch (dir) {
+            case NE:
+            case NW:
+                return -1;
+            case SE:
+            case SW:
+                return 1;
+            default:
+                return 0;
+        }
+    }
 
-        |  | 0| 1| 2| 3| 4| 5| 6| 7|
-        |0 |x |* |x |* |x |* |x |* |
-        |1 |* |x |* |x |* |x |* |x |
-        |2 |x |* |x |* |x |* |x |* |
-        |3 |* |  |* |  |* |  |* |  |
-        |4 |  |* |  |* |  |* |  |* |
-        |5 |* |o |* |o |* |o |* |o |
-        |6 |o |* |o |* |o |* |o |* |
-        |7 |* |o |* |o |* |o |* |o |
-
-        THIS FUNCTION DOES NOT PRINT TO THE CONSOLE OR MAKE ANY KIND OF SYSTEM.OUT.PRINTLN CALLS
-         */
+    /**
+     * Helper method for when a piece is moving to determine the column position change
+     *
+     * @param dir direction a piece is moving
+     * @pre dir is one of NE, NW, SW, SE
+     * @return int (-1, 1, or 0) representing the colum position change
+     */
+    private int colChange(DirectionEnum dir) {
+        switch (dir) {
+            case NE:
+            case SE:
+                return 1;
+            case NW:
+            case SW:
+                return -1;
+            default:
+                return 0;
+        }
     }
 }

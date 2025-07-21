@@ -16,12 +16,12 @@ public class BoardPosition
     private int column;
     
     /**
-     * @param r the row of the position; must be in [0, 7]
-     * @param c the column of the position; must be in [0, 7]
+     * @param r the row of the position
+     * @param c the column of the position
      * @pre 0 <= r < 8 AND 0 <= c < 8
      * @post row = r AND column = c
      */
-    public BoardPosition(int aRow, int aCol) {
+    public BoardPosition(int r, int c) {
         /*
         Constructor for the BoardPosition object. This should set both the row and column instance variables to their
         respective parameters.
@@ -50,8 +50,8 @@ public class BoardPosition
 
     /**
      * @param obj the object to compare to
-     * @return true iff o is a BoardPosition with same row and column
-     * @post equals = (o instanceof BoardPosition AND o.row == row AND o.column == column)
+     * @return true if obj is a BoardPosition with same row and column
+     * @post equals = (obj instance of BoardPosition AND obj.row == row AND obj.column == column)
      */
     public boolean equals(Object obj) {
         /*

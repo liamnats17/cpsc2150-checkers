@@ -2,6 +2,9 @@ package cpsc2150.extendedCheckers.models;
 
 import cpsc2150.extendedCheckers.util.DirectionEnum;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * ICheckerBoard is an interface for a standard checkerboard. This interface defines the basic behaviors of a checkerboard
  * such as moving and placing pieces, crowning and jumping, and accessors regarding board info and victory status.
@@ -21,6 +24,12 @@ public interface ICheckerBoard {
 
     /** The board is always 8x8 */
     public static final int BOARD_DIMENSIONS = 8;
+
+    public HashMap<Character, ArrayList<DirectionEnum>> getViableDirections();
+
+    public HashMap<Character, Integer> getPieceCounts();
+
+    public HashMap<DirectionEnum, Character> scanSurroundingPositions(BoardPosition startingPos);
 
     /**
      * Places a player's checker on the board at the specified position.
