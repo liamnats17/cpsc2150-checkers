@@ -29,7 +29,7 @@ public abstract class AbsCheckerBoard implements ICheckerBoard {
             str.append("|").append(row).append(" ");
             for (int col = 0; col < BOARD_DIMENSIONS; col++) {
                 BoardPosition pos = new BoardPosition(row, col);
-                str.append("|").append(" ").append(whatsAtPos(pos));
+                str.append("|").append(whatsAtPos(pos)).append(" ");
             }
             str.append("|\n");
         }

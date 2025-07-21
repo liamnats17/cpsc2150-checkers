@@ -74,7 +74,7 @@ public class CheckerBoard extends AbsCheckerBoard
 
         for (int r = 0; r < ROW_NUM; r++) {
             for (int c = 0; c < COL_NUM; c++) {
-                if ((r + c) % 2 == 1) {
+                if ((r + c) % 2 != 1) {
                     if (r < 3) {
                         board[r][c] = PLAYER_ONE;
                     } else if (r > 4) {
