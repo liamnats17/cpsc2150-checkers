@@ -16,60 +16,57 @@ public class BoardPosition
     private int column;
     
     /**
+     * Constructor for a BoardPosition object, initializes row and column to r and c respectively
      * @param r the row of the position
      * @param c the column of the position
      * @pre 0 <= r < 8 AND 0 <= c < 8
      * @post row = r AND column = c
      */
     public BoardPosition(int r, int c) {
-        /*
-        Constructor for the BoardPosition object. This should set both the row and column instance variables to their
-        respective parameters.
-         */
+        column = c;
+        row = r;
     }
     
      /**
+      * Accessor for the row instance variable
      * @return the row of the position
-     * @post getRow = row
+     * @post getRow = row; row = #row; column = #column
      */
     public int getRow() {
-        /*
-        Typical accessor for the row instance variable.
-         */
+        return row;
     }
 
     /**
+     * Accessor for the column instance variable
      * @return the column of the position
-     * @post getColumn = column
+     * @post getColumn = column; row = #row; column = #column
      */
     public int getColumn() {
-        /*
-        Typical accessor for the column instance variable.
-         */
+        return column;
     }
 
     /**
+     * Equals method that checks to see if the passed obj is equal to the BoardPosition object
      * @param obj the object to compare to
      * @return true if obj is a BoardPosition with same row and column
-     * @post equals = (obj instance of BoardPosition AND obj.row == row AND obj.column == column)
+     * @pre obj != null
+     * @post equals = (obj instance of BoardPosition AND obj.row == row AND obj.column == column);
+     * row = #row; column = #column
      */
     public boolean equals(Object obj) {
-        /*
-        returns true if this BoardPosition is equal to the parameter object. Two BoardPositions are equal if their row
-        and column vlaues are the same.
-
-        hint: it is intentional that this accepts a parameter of type Object. There is a way to check if that parameter
-        Object just happens to be an instance of a BoardPosition.
-         */
+        if (obj instanceof BoardPosition) {
+            BoardPosition other = (BoardPosition) obj;
+            return this.row == other.row && this.column == other.column;
+        }
+        return false;
     }
 
     /**
+     * Method that returns a combined string representation of the row and column variables
      * @return the string representation in format "row,column"
-     * @post toString = row + "," + column
+     * @post toString = row + "," + column; row = #row; column = #column
      */
     public String toString() {
-        /*
-        returns a String representation of the BoardPosition in the format of "row,column"
-         */
+        return row + ", " + column;
     }
 }

@@ -31,6 +31,7 @@ public class CheckerBoard extends AbsCheckerBoard
     public static final char EMPTY_POS = ' ';
     public static final char BLACK_TILE = '*';
 
+
     /*
     Standard Checkers starts with 8 rows and 8 columns. Both players begin with 12 pieces each.
      */
@@ -47,99 +48,67 @@ public class CheckerBoard extends AbsCheckerBoard
      *       viableDirections maps each player to correct directions (standard or king)
      */
     public CheckerBoard() {
-            board = new char[ROW_NUM][COL_NUM];
-            pieceCount = new HashMap<>();
-            viableDirections = new HashMap<>();
+        board = new char[ROW_NUM][COL_NUM];
+        pieceCount = new HashMap<>();
+        viableDirections = new HashMap<>();
+        pieceCount.put(PLAYER_ONE, STARTING_COUNT);
+        pieceCount.put(PLAYER_TWO, STARTING_COUNT);
 
-            pieceCount.put(PLAYER_ONE, STARTING_COUNT);
-            pieceCount.put(PLAYER_TWO, STARTING_COUNT);
+        ArrayList<DirectionEnum> p1Dirs = new ArrayList<>();
+        p1Dirs.add(DirectionEnum.SE);
+        p1Dirs.add(DirectionEnum.SW);
+        ArrayList<DirectionEnum> p2Dirs = new ArrayList<>();
+        p2Dirs.add(DirectionEnum.NE);
+        p2Dirs.add(DirectionEnum.NW);
 
-            ArrayList<DirectionEnum> p1Dirs = new ArrayList<>();
-            p1Dirs.add(DirectionEnum.SE);
-            p1Dirs.add(DirectionEnum.SW);
-            ArrayList<DirectionEnum> p2Dirs = new ArrayList<>();
-            p2Dirs.add(DirectionEnum.NE);
-            p2Dirs.add(DirectionEnum.NW);
+        ArrayList<DirectionEnum> kingDirs = new ArrayList<>();
+        kingDirs.add(DirectionEnum.SE);
+        kingDirs.add(DirectionEnum.SW);
+        kingDirs.add(DirectionEnum.NE);
+        kingDirs.add(DirectionEnum.NW);
 
-            viableDirections.put(PLAYER_ONE, p1Dirs);
-            viableDirections.put(PLAYER_TWO, p2Dirs);
+        viableDirections.put(PLAYER_ONE, p1Dirs);
+        viableDirections.put(Character.toUpperCase(PLAYER_ONE), kingDirs);
+        viableDirections.put(PLAYER_TWO, p2Dirs);
+        viableDirections.put(Character.toUpperCase(PLAYER_TWO), kingDirs);
 
-            for (int r = 0; r < ROW_NUM; r++) {
-                for (int c = 0; c < COL_NUM; c++) {
-                    if ((r + c) % 2 == 1) {
-                        if (r < 3) {
-                            board[r][c] = PLAYER_ONE;
-                        } else if (r > 4) {
-                            board[r][c] = PLAYER_TWO;
-                        } else {
-                            board[r][c] = EMPTY_POS;
-                        }
+        for (int r = 0; r < ROW_NUM; r++) {
+            for (int c = 0; c < COL_NUM; c++) {
+                if ((r + c) % 2 == 1) {
+                    if (r < 3) {
+                        board[r][c] = PLAYER_ONE;
+                    } else if (r > 4) {
+                        board[r][c] = PLAYER_TWO;
                     } else {
-                        board[r][c] = BLACK_TILE;
+                        board[r][c] = EMPTY_POS;
                     }
+                } else {
+                    board[r][c] = BLACK_TILE;
                 }
             }
+        }
     }
 
-    /**
-     * Accessor for the viableDirections HashMap.
-     *
-     * @return mapping of each player to their list of viable movement directions
-     * @pre none
-     * @post returns reference to viableDirections
-     */
     @Override
     public HashMap<Character, ArrayList<DirectionEnum>> getViableDirections() {
         return viableDirections;
     }
 
-    /**
-     * Accessor for the pieceCount HashMap.
-     *
-     * @return mapping of each player to number of pieces remaining
-     * @pre none
-     * @post returns reference to pieceCount
-     */
     @Override
     public HashMap<Character, Integer> getPieceCounts() {
         return pieceCount;
     }
 
-    /**
-     * Places a player’s piece at the specified board position.
-     *
-     * @param pos BoardPosition to place the piece
-     * @param player character representing the player ('x', 'o', etc.)
-     * @pre pos != null AND 0 <= pos.row < 8 AND 0 <= pos.col < 8 AND pos != Non_Playable_Tile
-     * @post board[pos.row][pos.col] == player
-     */
     @Override
     public void placePiece(BoardPosition pos, char player) {
         board[pos.getRow()][pos.getColumn()] = player;
     }
 
-    /**
-     * Returns the character at a given board position.
-     *
-     * @param pos the BoardPosition to check
-     * @return character at that position ('x', 'o', '*', ' ', etc.)
-     * @pre pos != null AND 0 <= pos.row < 8 AND 0 <= pos.col < 8
-     * @post returns the value of board[pos.row][pos.col]
-     */
     @Override
     public char whatsAtPos(BoardPosition pos) {
         return board[pos.getRow()][pos.getColumn()];
     }
 
-    /**
-     * Moves a piece one tile in the specified direction.
-     *
-     * @param startingPos starting position of the piece
-     * @param dir direction to move
-     * @return new BoardPosition after move
-     * @pre startingPos != null AND dir != null AND destination is valid and empty
-     * @post board[startingPos] == EMPTY_POS, board[newPos] == piece; returns newPos
-     */
     @Override
     public BoardPosition movePiece(BoardPosition startingPos, DirectionEnum dir) {
         char piece = whatsAtPos(startingPos);
@@ -153,15 +122,6 @@ public class CheckerBoard extends AbsCheckerBoard
         return dest;
     }
 
-    /**
-     * Moves a piece by jumping over an opponent's piece.
-     *
-     * @param startingPos starting position of the piece
-     * @param dir direction to jump
-     * @return new BoardPosition after jump
-     * @pre startingPos != null AND dir != null AND intermediate square has opponent AND landing square is empty
-     * @post jumped piece is removed, count decremented; board[startingPos] == EMPTY_POS, board[newPos] == piece
-     */
     @Override
     public BoardPosition jumpPiece(BoardPosition startingPos, DirectionEnum dir) {
         char piece = whatsAtPos(startingPos);
@@ -183,14 +143,6 @@ public class CheckerBoard extends AbsCheckerBoard
         return end;
     }
 
-    /**
-     * Scans the surrounding positions and maps each direction to the character at that adjacent position.
-     *
-     * @param startingPos center position to scan from
-     * @return HashMap of DirectionEnum to character at adjacent positions
-     * @pre startingPos != null
-     * @post returns map of up to 4 direction-to-char entries representing valid diagonal neighbors
-     */
     public HashMap<DirectionEnum, Character> scanSurroundingPositions(BoardPosition startingPos) {
         HashMap<DirectionEnum, Character> surroundings = new HashMap<>();
 
@@ -210,6 +162,8 @@ public class CheckerBoard extends AbsCheckerBoard
      * @param dir direction a piece is moving
      * @pre dir is one of NE, NW, SW, SE
      * @return int (-1, 1, or 0) representing the row position change
+     * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
+     * viableDirections = #viableDirections
      */
     private int rowChange(DirectionEnum dir) {
         switch (dir) {
@@ -229,7 +183,9 @@ public class CheckerBoard extends AbsCheckerBoard
      *
      * @param dir direction a piece is moving
      * @pre dir is one of NE, NW, SW, SE
-     * @return int (-1, 1, or 0) representing the colum position change
+     * @return int (-1, 1, or 0) representing the column position change
+     * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
+     * viableDirections = #viableDirections
      */
     private int colChange(DirectionEnum dir) {
         switch (dir) {
