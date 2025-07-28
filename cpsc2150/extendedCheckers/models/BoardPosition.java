@@ -1,7 +1,7 @@
 package cpsc2150.extendedCheckers.models;
 
 /**
- * @invariant 0 <= row < 8 AND 0 <= column < 8
+ * @invariant Row and column must not be negative or <= board dimensions
  */
 public class BoardPosition
 {
@@ -19,7 +19,7 @@ public class BoardPosition
      * Constructor for a BoardPosition object, initializes row and column to r and c respectively
      * @param r the row of the position
      * @param c the column of the position
-     * @pre 0 <= r < 8 AND 0 <= c < 8
+     * @pre row and column must not be negative or >= board dimensions
      * @post row = r AND column = c
      */
     public BoardPosition(int r, int c) {

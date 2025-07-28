@@ -6,6 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * CheckerBoard class that implements ICheckerBoard. Implements a checkerboard using a 2D array of characters
+ * to serve as the checkerboard
+ *
+ * @invariant a player cannot exist on a BLACK_TILE
+ * @invariant player count cannot exceed STARTING_COUNT nor go negative
+ * @invariant pieces must stay within the bounds of the board
+ * @invariant when a piece is moved, a EMPTY_POS should be placed at the starting position
+ */
 public class CheckerBoard extends AbsCheckerBoard
 {
     /**
@@ -43,7 +52,7 @@ public class CheckerBoard extends AbsCheckerBoard
      * Constructor for the CheckerBoard object.
      *
      * @pre none
-     * @post board is a 8x8 grid initialized with correct starting pieces;
+     * @post board is a ROW_NUMxCOL_NUM grid initialized with correct starting pieces;
      *       pieceCount maps each player to STARTING_COUNT;
      *       viableDirections maps each player to correct directions (standard or king)
      */
@@ -107,96 +116,5 @@ public class CheckerBoard extends AbsCheckerBoard
     @Override
     public char whatsAtPos(BoardPosition pos) {
         return board[pos.getRow()][pos.getColumn()];
-    }
-
-    @Override
-    public BoardPosition movePiece(BoardPosition startingPos, DirectionEnum dir) {
-        char piece = whatsAtPos(startingPos);
-        int newRow = startingPos.getRow() + rowChange(dir);
-        int newCol = startingPos.getColumn() + colChange(dir);
-
-        BoardPosition dest = new BoardPosition(newRow, newCol);
-        placePiece(dest, piece);
-        placePiece(startingPos, EMPTY_POS);
-
-        return dest;
-    }
-
-    @Override
-    public BoardPosition jumpPiece(BoardPosition startingPos, DirectionEnum dir) {
-        char piece = whatsAtPos(startingPos);
-        int rowMid = startingPos.getRow() + rowChange(dir);
-        int colMid = startingPos.getColumn() + colChange(dir);
-        int rowEnd = startingPos.getRow() + 2 * rowChange(dir);
-        int colEnd = startingPos.getColumn() + 2 * colChange(dir);
-
-        BoardPosition mid = new BoardPosition(rowMid, colMid);
-        BoardPosition end = new BoardPosition(rowEnd, colEnd);
-
-        char opponent = whatsAtPos(mid);
-        placePiece(mid, EMPTY_POS);
-        pieceCount.put(Character.toLowerCase(opponent), pieceCount.get(Character.toLowerCase(opponent)) - 1);
-
-        placePiece(end, piece);
-        placePiece(startingPos, EMPTY_POS);
-
-        return end;
-    }
-
-    public HashMap<DirectionEnum, Character> scanSurroundingPositions(BoardPosition startingPos) {
-        HashMap<DirectionEnum, Character> surroundings = new HashMap<>();
-
-        for (DirectionEnum dir : DirectionEnum.values()) {
-            int r = startingPos.getRow() + rowChange(dir);
-            int c = startingPos.getColumn() + colChange(dir);
-            if (r >= 0 && r < ROW_NUM && c >= 0 && c < COL_NUM) {
-                surroundings.put(dir, board[r][c]);
-            }
-        }
-        return surroundings;
-    }
-
-    /**
-     * Helper method for when a piece is moving to determine the row position change
-     *
-     * @param dir direction a piece is moving
-     * @pre dir is one of NE, NW, SW, SE
-     * @return int (-1, 1, or 0) representing the row position change
-     * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
-     * viableDirections = #viableDirections
-     */
-    private int rowChange(DirectionEnum dir) {
-        switch (dir) {
-            case NE:
-            case NW:
-                return -1;
-            case SE:
-            case SW:
-                return 1;
-            default:
-                return 0;
-        }
-    }
-
-    /**
-     * Helper method for when a piece is moving to determine the column position change
-     *
-     * @param dir direction a piece is moving
-     * @pre dir is one of NE, NW, SW, SE
-     * @return int (-1, 1, or 0) representing the column position change
-     * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
-     * viableDirections = #viableDirections
-     */
-    private int colChange(DirectionEnum dir) {
-        switch (dir) {
-            case NE:
-            case SE:
-                return 1;
-            case NW:
-            case SW:
-                return -1;
-            default:
-                return 0;
-        }
     }
 }

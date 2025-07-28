@@ -46,16 +46,6 @@ public interface ICheckerBoard {
     public HashMap<Character, Integer> getPieceCounts();
 
     /**
-     * Returns a map of directions to characters located diagonally around a given board position
-     * @param startingPos the origin position to scan around
-     * @return map of DirectionEnum to character at the adjacent diagonal position
-     * @pre startingPos is a valid board position
-     * @post scanSurroundingPositions = HashMap of all valid surrounding diagonal positions with the piece located there;
-     * self = #self; piece count = #piece count; viable directions = #viable directions
-     */
-    public HashMap<DirectionEnum, Character> scanSurroundingPositions(BoardPosition startingPos);
-
-    /**
      * Places a player's checker on the board at the specified position.
      * @param pos The position to place the checker.
      * @param player The player's character (e.g., 'X' or 'O').
@@ -85,7 +75,17 @@ public interface ICheckerBoard {
      * @post movePiece = new BoardPosition of moved piece; the piece is moved one space in dir, startingPos is now empty; piece count = #piece count
      * viable directions = #viable directions
      */
-    public BoardPosition movePiece(BoardPosition startingPos, DirectionEnum dir);
+    default public BoardPosition movePiece(BoardPosition startingPos, DirectionEnum dir) {
+        char piece = whatsAtPos(startingPos);
+        int newRow = startingPos.getRow() + rowChange(dir);
+        int newCol = startingPos.getColumn() + colChange(dir);
+
+        BoardPosition dest = new BoardPosition(newRow, newCol);
+        placePiece(dest, piece);
+        placePiece(startingPos, ' ');
+
+        return dest;
+    }
 
     /**
      * Jumps a piece from startingPos in the given direction if valid.
@@ -96,7 +96,25 @@ public interface ICheckerBoard {
      * @post jumpPiece = new BoardPosition of jumping piece; the piece is moved two spaces in dir, opponent piece is removed; piece count of jumped player is decreased
      * viable directions = #viable directions
      */
-    public BoardPosition jumpPiece(BoardPosition startingPos, DirectionEnum dir);
+    default public BoardPosition jumpPiece(BoardPosition startingPos, DirectionEnum dir) {
+        char piece = whatsAtPos(startingPos);
+        int rowMid = startingPos.getRow() + rowChange(dir);
+        int colMid = startingPos.getColumn() + colChange(dir);
+        int rowEnd = startingPos.getRow() + 2 * rowChange(dir);
+        int colEnd = startingPos.getColumn() + 2 * colChange(dir);
+
+        BoardPosition mid = new BoardPosition(rowMid, colMid);
+        BoardPosition end = new BoardPosition(rowEnd, colEnd);
+
+        char opponent = whatsAtPos(mid);
+        placePiece(mid, ' ');
+        getPieceCounts().put(Character.toLowerCase(opponent), getPieceCounts().get(Character.toLowerCase(opponent)) - 1);
+
+        placePiece(end, piece);
+        placePiece(startingPos, ' ');
+
+        return end;
+    }
 
     /**
      * Makes the piece at posOfPlayer a king.
@@ -132,5 +150,71 @@ public interface ICheckerBoard {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns a map of directions to characters located diagonally around a given board position
+     * @param startingPos the origin position to scan around
+     * @return map of DirectionEnum to character at the adjacent diagonal position
+     * @pre startingPos is a valid board position
+     * @post scanSurroundingPositions = HashMap of all valid surrounding diagonal positions with the piece located there;
+     * self = #self; piece count = #piece count; viable directions = #viable directions
+     */
+    default public HashMap<DirectionEnum, Character> scanSurroundingPositions(BoardPosition startingPos) {
+        HashMap<DirectionEnum, Character> surroundings = new HashMap<>();
+
+        for (DirectionEnum dir : DirectionEnum.values()) {
+            int r = startingPos.getRow() + rowChange(dir);
+            int c = startingPos.getColumn() + colChange(dir);
+            if (r >= 0 && r < BOARD_DIMENSIONS && c >= 0 && c < BOARD_DIMENSIONS) {
+                BoardPosition pos = new BoardPosition(r, c);
+                surroundings.put(dir, whatsAtPos(pos));
+            }
+        }
+        return surroundings;
+    }
+
+    /**
+     * Helper method for when a piece is moving to determine the row position change
+     *
+     * @param dir direction a piece is moving
+     * @pre dir is one of NE, NW, SW, SE
+     * @return int (-1, 1, or 0) representing the row position change
+     * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
+     * viableDirections = #viableDirections
+     */
+    private int rowChange(DirectionEnum dir) {
+        switch (dir) {
+            case NE:
+            case NW:
+                return -1;
+            case SE:
+            case SW:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Helper method for when a piece is moving to determine the column position change
+     *
+     * @param dir direction a piece is moving
+     * @pre dir is one of NE, NW, SW, SE
+     * @return int (-1, 1, or 0) representing the column position change
+     * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
+     * viableDirections = #viableDirections
+     */
+    private int colChange(DirectionEnum dir) {
+        switch (dir) {
+            case NE:
+            case SE:
+                return 1;
+            case NW:
+            case SW:
+                return -1;
+            default:
+                return 0;
+        }
     }
 }
