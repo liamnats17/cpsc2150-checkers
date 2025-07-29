@@ -1,31 +1,31 @@
 package cpsc2150.extendedCheckers.tests;
 
 import cpsc2150.extendedCheckers.models.BoardPosition;
-import cpsc2150.extendedCheckers.models.CheckerBoard;
 
 import static org.junit.Assert.*;
 
+import cpsc2150.extendedCheckers.models.CheckerBoardMem;
 import cpsc2150.extendedCheckers.models.ICheckerBoard;
 import cpsc2150.extendedCheckers.util.DirectionEnum;
 import org.junit.Test;
 
 import java.util.*;
 
-public class TestCheckerBoard {
+public class TestCheckerBoardMem {
 
     private ICheckerBoard makeBoard() {
-        return new CheckerBoard(8, 'x', 'o');
+        return new CheckerBoardMem(8, 'x', 'o');
     }
-    
+
     // Helper to build expected board string
     private String arrayToString(char[][] board) {
         StringBuilder s = new StringBuilder("|  |");
         int numRows = board.length;
         int numCols = board[0].length;
-        
+
         for (int i = 0; i < numCols; i++) {
             if (i < 10) {
-                    s.append(" ").append(i).append("|");
+                s.append(" ").append(i).append("|");
             } else {
                 s.append(i).append("|");
             }
@@ -52,8 +52,8 @@ public class TestCheckerBoard {
         }
         return s.toString();
     }
-  
-  // Helper to build default 2d array representation 
+
+    // Helper to build default 2d array representation
     private void initializeDefaultBoard(char[][] board) {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 8; col++) {
@@ -64,7 +64,7 @@ public class TestCheckerBoard {
             for (int col = 0; col < 8; col++) {
                 board[row][col] = (row + col) % 2 != 1 ? ' ' : '*';
             }
-      }
+        }
         for (int row = 5; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 board[row][col] = (row + col) % 2 != 1 ? 'o' : '*';
@@ -333,4 +333,5 @@ public class TestCheckerBoard {
         assertNull(result.get(DirectionEnum.NW));
     }
 }
+
 

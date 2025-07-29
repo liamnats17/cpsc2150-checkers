@@ -1,11 +1,7 @@
 package cpsc2150.extendedCheckers.models;
 
 import cpsc2150.extendedCheckers.util.DirectionEnum;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * CheckerBoard class that implements ICheckerBoard. Implements a checkerboard using a 2D array of characters
@@ -16,67 +12,43 @@ import java.util.List;
  * @invariant pieces must stay within the bounds of the board
  * @invariant when a piece is moved, a EMPTY_POS should be placed at the starting position
  */
-public class CheckerBoard extends AbsCheckerBoard
-{
-    /**
-     * A 2D array of characters used to represent our checkerboard.
-     */
-    private char[][] board;
-
-    /**
-     * A HashMap, with a Character key and an Integer value, that is used to map a player's char to the number of
-     * tokens that player still has left on the board.
-     */
+public class CheckerBoardMem extends AbsCheckerBoard {
+    private Map<Character, ArrayList<BoardPosition>> board;
     private HashMap<Character, Integer> pieceCount;
-
-    /**
-     * A HashMap, with a Character key and an ArrayList of DirectionEnums value, used to map a player (and its king
-     * representation) to the directions that player can viably move in. A non-kinged (standard) piece can only move
-     * in the diagonal directions away from its starting position. A kinged piece can move in the same directions the
-     * standard piece can move in plus the opposite directions the standard piece can move in.
-     */
     private HashMap<Character, ArrayList<DirectionEnum>> viableDirections;
-    private final char PLAYER_ONE;
-    private final char PLAYER_TWO;
-    public static final char EMPTY_POS = ' ';
-    public static final char BLACK_TILE = '*';
-
-    private final int ROW_NUM;
-    private final int COL_NUM;
+    private final char PLAYER_ONE, PLAYER_TWO;
+    private final int COL_NUM, ROW_NUM;
 
     /**
-     * Constructor for the CheckerBoard object.
+     * Constructor for the CheckerBoardMem object.
      *
      * @param aDimension the dimension size for the board
      * @param aPlayerOne the character representing Player One
      * @param aPlayerTwo the character representing Player Two
-     * @pre 8 <= aDimension <= 16 and aDimension is even; aPlayerOne and aPlayerTwo must be differing single letters
+     * @pre 8 <= aDimension <= 16 and aDimension is even; aPlayerOne and aPlayerTwo must be differing single characters
      * @post board is a aDimensionxaDimension grid initialized with correct starting pieces;
      *       pieceCount maps each player to (aDimension * playableRows) / 4;
      *       viableDirections maps each player to correct directions (standard or king)
      */
-    public CheckerBoard(int aDimension, char aPlayerOne, char aPlayerTwo) {
+    public CheckerBoardMem(int aDimension, char aPlayerOne, char aPlayerTwo) {
         PLAYER_ONE = aPlayerOne;
         PLAYER_TWO = aPlayerTwo;
 
         ROW_NUM = aDimension;
         COL_NUM = aDimension;
 
-        board = new char[aDimension][aDimension];
-        pieceCount = new HashMap<>();
-        viableDirections = new HashMap<>();
+        board = new HashMap<>();
+        board.put(PLAYER_ONE, new ArrayList<>());
+        board.put(PLAYER_TWO, new ArrayList<>());
 
-        for (int r = 0; r < aDimension; r++) {
-            for (int c = 0; c < aDimension; c++) {
-                board[r][c] = ((r + c) % 2 == 1) ? BLACK_TILE : EMPTY_POS;
-            }
-        }
+        pieceCount = new HashMap<>();
 
         int playableRows = aDimension - 2;
         int startingCount = (aDimension * playableRows) / 4;
         pieceCount.put(PLAYER_ONE, startingCount);
         pieceCount.put(PLAYER_TWO, startingCount);
 
+        viableDirections = new HashMap<>();
         ArrayList<DirectionEnum> p1Dirs = new ArrayList<>(List.of(DirectionEnum.SE, DirectionEnum.SW));
         ArrayList<DirectionEnum> p2Dirs = new ArrayList<>(List.of(DirectionEnum.NE, DirectionEnum.NW));
         ArrayList<DirectionEnum> kingDirs = new ArrayList<>(List.of(DirectionEnum.SE, DirectionEnum.SW, DirectionEnum.NE, DirectionEnum.NW));
@@ -90,15 +62,14 @@ public class CheckerBoard extends AbsCheckerBoard
             for (int c = 0; c < aDimension; c++) {
                 if ((r + c) % 2 != 1) {
                     if (r < playableRows / 2) {
-                        board[r][c] = PLAYER_ONE;
+                        board.get(PLAYER_ONE).add(new BoardPosition(r, c));
                     } else if (r >= aDimension - playableRows / 2) {
-                        board[r][c] = PLAYER_TWO;
+                        board.get(PLAYER_TWO).add(new BoardPosition(r, c));
                     }
                 }
             }
         }
     }
-
     @Override
     public HashMap<Character, ArrayList<DirectionEnum>> getViableDirections() {
         return viableDirections;
@@ -121,12 +92,27 @@ public class CheckerBoard extends AbsCheckerBoard
 
     @Override
     public void placePiece(BoardPosition pos, char player) {
-        board[pos.getRow()][pos.getColumn()] = player;
+        for (Map.Entry<Character, ArrayList<BoardPosition>> entry : board.entrySet()) {
+            if (entry.getValue().remove(pos)) {
+                break;
+            }
+        }
+
+        // Add the position to the correct player's list
+        board.computeIfAbsent(player, k -> new ArrayList<>()).add(pos);
     }
 
     @Override
     public char whatsAtPos(BoardPosition pos) {
-        return board[pos.getRow()][pos.getColumn()];
+        for (Map.Entry<Character, ArrayList<BoardPosition>> entry : board.entrySet()) {
+            if (entry.getValue().contains(pos)) {
+                return entry.getKey();
+            }
+        }
+        if ((pos.getRow() + pos.getColumn()) % 2 != 0) {
+            return '*';
+        }
+        return ' ';
     }
 
     @Override

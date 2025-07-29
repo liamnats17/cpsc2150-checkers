@@ -9,21 +9,50 @@ import java.util.HashMap;
  * ICheckerBoard is an interface for a standard checkerboard. This interface defines the basic behaviors of a checkerboard
  * such as moving and placing pieces, crowning and jumping, and accessors regarding board info and victory status.
  *
- * @initialization_ensures The board is set to the standard checkers starting position with 12 pieces for each player
+ * @initialization_ensures The board is set to the standard checkers starting position with a variable size and piece counts
+ * dependent upon the board size
  *
  *
  * @defines: A board of BOARD_DIMENSIONS x BOARD_DIMENSIONS containing pieces from players (self)
  *           A count of each players' pieces (piece count)
  *           A list of all standard viable moving directions a piece can make (viable directions)
+ *           A constant for the characters representing Player One and Player Two
  *
- * @constraints: The board size is always BOARD_DIMENSIONS x BOARD_DIMENSIONS.
+ * @constraints: The board size is limited to 8x8, 10x10, 12x12, 14x14, or 16x16.
  *               Each position contains either a player piece, is a non-playable space, or is empty.
- *               Limited to two players x's and o's
+ *               Limited to two players
  */
 public interface ICheckerBoard {
 
-    /** The board is always 8x8 */
-    public static final int BOARD_DIMENSIONS = 8;
+    /**
+     * Accessor for a board's dimensions.
+     *
+     * @return char representing player one
+     * @pre none
+     * @post getPlayerOne = char representing the size of the board; self = #self;
+     * piece count = #piece count; viable directions = #viable directions
+     */
+    public char getPlayerOne();
+
+    /**
+     * Accessor for a board's dimensions.
+     *
+     * @return char representing player two
+     * @pre none
+     * @post getPlayerTwo = char representing the size of the board; self = #self;
+     * piece count = #piece count; viable directions = #viable directions
+     */
+    public char getPlayerTwo();
+
+    /**
+     * Accessor for a board's dimensions.
+     *
+     * @return int representing the size of the board
+     * @pre none
+     * @post getDimensions = int representing the size of the board; self = #self;
+     * piece count = #piece count; viable directions = #viable directions
+     */
+    public int getDimensions();
 
     /**
      * Accessor for the viableDirections HashMap.
@@ -140,9 +169,9 @@ public interface ICheckerBoard {
      * viable directions = #viable directions
      */
     default public boolean checkPlayerWin(Character player) {
-        char opponent = (player == 'x') ? 'o' : 'x';
-        for (int r = 0; r < BOARD_DIMENSIONS; r++) {
-            for (int c = 0; c < BOARD_DIMENSIONS; c++) {
+        char opponent = (player == getPlayerOne()) ? getPlayerTwo() : getPlayerOne();
+        for (int r = 0; r < getDimensions(); r++) {
+            for (int c = 0; c < getDimensions(); c++) {
                 BoardPosition pos = new BoardPosition(r, c);
                 if (whatsAtPos(pos) == opponent || whatsAtPos(pos) == Character.toUpperCase(opponent)) {
                     return false;
@@ -166,7 +195,7 @@ public interface ICheckerBoard {
         for (DirectionEnum dir : DirectionEnum.values()) {
             int r = startingPos.getRow() + rowChange(dir);
             int c = startingPos.getColumn() + colChange(dir);
-            if (r >= 0 && r < BOARD_DIMENSIONS && c >= 0 && c < BOARD_DIMENSIONS) {
+            if (r >= 0 && r < getDimensions() && c >= 0 && c < getDimensions()) {
                 BoardPosition pos = new BoardPosition(r, c);
                 surroundings.put(dir, whatsAtPos(pos));
             }
@@ -179,7 +208,7 @@ public interface ICheckerBoard {
      *
      * @param dir direction a piece is moving
      * @pre dir is one of NE, NW, SW, SE
-     * @return int (-1, 1, or 0) representing the row position change
+     * @return int representing the row position change
      * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
      * viableDirections = #viableDirections
      */
@@ -201,7 +230,7 @@ public interface ICheckerBoard {
      *
      * @param dir direction a piece is moving
      * @pre dir is one of NE, NW, SW, SE
-     * @return int (-1, 1, or 0) representing the column position change
+     * @return int representing the column position change
      * @post rowChange = int representing row change; board = #board; pieceCount = #pieceCount
      * viableDirections = #viableDirections
      */

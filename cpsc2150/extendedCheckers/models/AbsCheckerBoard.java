@@ -2,9 +2,10 @@ package cpsc2150.extendedCheckers.models;
 
 /**
  * Abstract class to implement toString for all ICheckerBoard implementations.
- * No private data allowed.
  */
 public abstract class AbsCheckerBoard implements ICheckerBoard {
+
+    private int VARIABLE_DIMENSIONS;
 
     /**
      * Converts the board to a string representation.
@@ -19,17 +20,26 @@ public abstract class AbsCheckerBoard implements ICheckerBoard {
 
         // Print header row
         str.append("|  ");
-        for (int col = 0; col < BOARD_DIMENSIONS; col++) {
+        for (int col = 0; col < getDimensions(); col++) {
             str.append("| ").append(col);
         }
         str.append("|\n");
 
         // Print board rows
-        for (int row = 0; row < BOARD_DIMENSIONS; row++) {
+        for (int row = 0; row < getDimensions(); row++) {
             str.append("|").append(row).append(" ");
-            for (int col = 0; col < BOARD_DIMENSIONS; col++) {
+            for (int col = 0; col < getDimensions(); col++) {
                 BoardPosition pos = new BoardPosition(row, col);
-                str.append("|").append(whatsAtPos(pos)).append(" ");
+                char piece = whatsAtPos(pos);
+                if (piece == ' ') {
+                    if ((row + col) % 2 == 0) {
+                        str.append("|").append(' ').append(" ");
+                    } else {
+                        str.append("|").append('*').append(" ");
+                    }
+                } else {
+                    str.append("|").append(whatsAtPos(pos)).append(" ");
+                }
             }
             str.append("|\n");
         }
